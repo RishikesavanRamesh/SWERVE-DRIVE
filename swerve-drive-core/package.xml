@@ -3,7 +3,7 @@
 <package format="3">
   <name>swerve_drive_core</name>
   <version>1.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Swerve Drive Kinematics core logic abstracted for reuse</description>
   <maintainer email="rishikesavanramesh@proton.me">RishikesavanRamesh</maintainer>
   <license>MIT License</license>
 
