@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro">
+
+  <xacro:include filename="$(find swervebot_description)/urdf/common/inertials.xacro" />
+  <xacro:include filename="$(find swervebot_description)/urdf/common/materials.xacro" />
+
+  <xacro:macro name="swervebot" params="prefix parent *origin">
+
+    <link name="${prefix}base_link"></link>
+    <joint name="${prefix}base_link_to_base" type="fixed">
+      <parent link="base_link" />
+      <child link="chasis" />
+      <origin rpy="0.0 0 0" xyz="0 0 0" />
+    </joint>
+    <link name="${prefix}chasis">
+      <visual>
+        <origin xyz="0 0 0.10499999999999998224" rpy="0 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/chasis.stl" />
+        </geometry>
+        <material name="chasis_material">
+          <color rgba="0.61568627450980395466 0.81176470588235294379 0.92941176470588238168 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.10499999999999998224" rpy="0 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/chasis.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="-1.5512572545040916767e-17 1.2648761072463357817e-18 0.10777331160054851034"
+          rpy="0 0 0" />
+        <mass value="5.0435911433511453339" />
+        <inertia ixx="0.10848582078646788751" ixy="0" ixz="0" iyy="0.10848582078646784588" iyz="0"
+          izz="0.21684537277144544376" />
+      </inertial>
+    </link>
+
+    <link name="${prefix}wheel_anchor">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+        <material name="wheel_anchor_material">
+          <color rgba="0.2313725490196078538 0.38039215686274507888 0.7058823529411765163 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.5030456879117082281e-08 -6.7751719466047077844e-05 -0.021055719080814411237"
+          rpy="0 0 0" />
+        <mass value="0.15247552198160044257" />
+        <inertia ixx="9.5639905250553849361e-05" ixy="-3.5883308240825731649e-11"
+          ixz="4.4075315863251659673e-11" iyy="7.3508975889251937765e-05"
+          iyz="-2.9157722312163351355e-07" izz="8.6332890059226041952e-05" />
+      </inertial>
+    </link>
+
+    <link name="${prefix}wheel">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+        <material name="wheel_material">
+          <color rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.4784808977097441129e-07 6.9050265376555119978e-05 -0.014293675127513394418"
+          rpy="0 0 0" />
+        <mass value="0.22298680527299394316" />
+        <inertia ixx="8.8701734811461518601e-05" ixy="8.0794207721028392386e-10"
+          ixz="-3.5252658158901637823e-12" iyy="8.9079070488606209091e-05"
+          iyz="-1.6464233015813588186e-09" izz="0.00016621369094718240617" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}delta_a" type="revolute">
+      <origin xyz="0 -0.014186745762824942707 -0.050000000000000030531"
+        rpy="1.570796326794896558 -6.1232339957367660359e-17 0" />
+      <parent link="wheel_anchor" />
+      <child link="wheel" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <joint name="${prefix}gamma_a" type="revolute">
+      <origin xyz="-0.18000000000000002109 -0.17999999999999996558 0.089999999999999996669"
+        rpy="0 -0 0" />
+      <parent link="chasis" />
+      <child link="wheel_anchor" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <link name="${prefix}wheel_anchor_2">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+        <material name="wheel_anchor_material">
+          <color rgba="0.2313725490196078538 0.38039215686274507888 0.7058823529411765163 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.5030456879117082281e-08 -6.7751719466047077844e-05 -0.021055719080814411237"
+          rpy="0 0 0" />
+        <mass value="0.15247552198160044257" />
+        <inertia ixx="9.5639905250553849361e-05" ixy="-3.5883308240825731649e-11"
+          ixz="4.4075315863251659673e-11" iyy="7.3508975889251937765e-05"
+          iyz="-2.9157722312163351355e-07" izz="8.6332890059226041952e-05" />
+      </inertial>
+    </link>
+
+    <link name="${prefix}wheel_2">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+        <material name="wheel_material">
+          <color rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.4784808977097441129e-07 6.9050265376555119978e-05 -0.014293675127513394418"
+          rpy="0 0 0" />
+        <mass value="0.22298680527299394316" />
+        <inertia ixx="8.8701734811461518601e-05" ixy="8.0794207721028392386e-10"
+          ixz="-3.5252658158901637823e-12" iyy="8.9079070488606209091e-05"
+          iyz="-1.6464233015813588186e-09" izz="0.00016621369094718240617" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}delta_b" type="revolute">
+      <origin xyz="0 -0.014186745762824942707 -0.050000000000000058287"
+        rpy="1.570796326794896558 -6.1232339957367660359e-17 0" />
+      <parent link="wheel_anchor_2" />
+      <child link="wheel_2" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <joint name="${prefix}gamma_b" type="revolute">
+      <origin xyz="0.17999999999999996558 -0.18000000000000002109 0.089999999999999982792"
+        rpy="0 -0 0" />
+      <parent link="chasis" />
+      <child link="wheel_anchor_2" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <link name="${prefix}wheel_anchor_3">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+        <material name="wheel_anchor_material">
+          <color rgba="0.2313725490196078538 0.38039215686274507888 0.7058823529411765163 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.5030456879117082281e-08 -6.7751719466047077844e-05 -0.021055719080814411237"
+          rpy="0 0 0" />
+        <mass value="0.15247552198160044257" />
+        <inertia ixx="9.5639905250553849361e-05" ixy="-3.5883308240825731649e-11"
+          ixz="4.4075315863251659673e-11" iyy="7.3508975889251937765e-05"
+          iyz="-2.9157722312163351355e-07" izz="8.6332890059226041952e-05" />
+      </inertial>
+    </link>
+
+    <link name="${prefix}wheel_3">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+        <material name="wheel_material">
+          <color rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.4784808977097441129e-07 6.9050265376555119978e-05 -0.014293675127513394418"
+          rpy="0 0 0" />
+        <mass value="0.22298680527299394316" />
+        <inertia ixx="8.8701734811461518601e-05" ixy="8.0794207721028392386e-10"
+          ixz="-3.5252658158901637823e-12" iyy="8.9079070488606209091e-05"
+          iyz="-1.6464233015813588186e-09" izz="0.00016621369094718240617" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}delta_c" type="revolute">
+      <origin xyz="0 -0.014186745762824942707 -0.050000000000000058287"
+        rpy="1.570796326794896558 -6.1232339957367660359e-17 0" />
+      <parent link="wheel_anchor_3" />
+      <child link="wheel_3" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <joint name="${prefix}gamma_c" type="revolute">
+      <origin xyz="0.18000000000000002109 0.18000000000000002109 0.089999999999999996669"
+        rpy="0 -0 0" />
+      <parent link="chasis" />
+      <child link="wheel_anchor_3" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <link name="${prefix}wheel_anchor_4">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+        <material name="wheel_anchor_material">
+          <color rgba="0.2313725490196078538 0.38039215686274507888 0.7058823529411765163 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.17999999999999996558 0.014999999999999985567"
+          rpy="0 -6.1232339957367660359e-17 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel_anchor.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.5030456879117082281e-08 -6.7751719466047077844e-05 -0.021055719080814411237"
+          rpy="0 0 0" />
+        <mass value="0.15247552198160044257" />
+        <inertia ixx="9.5639905250553849361e-05" ixy="-3.5883308240825731649e-11"
+          ixz="4.4075315863251659673e-11" iyy="7.3508975889251937765e-05"
+          iyz="-2.9157722312163351355e-07" izz="8.6332890059226041952e-05" />
+      </inertial>
+    </link>
+
+    <link name="${prefix}wheel_4">
+      <visual>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+        <material name="wheel_material">
+          <color rgba="0.64705882352941179736 0.64705882352941179736 0.64705882352941179736 1.0" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0.18000000000000002109 0.06500000000000000222 -0.19418674576282490829"
+          rpy="-1.570796326794896558 -0 0" />
+        <geometry>
+          <mesh filename="package://swervebot_description/meshes/swervebot/collision/wheel.stl" />
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="1.4784808977097441129e-07 6.9050265376555119978e-05 -0.014293675127513394418"
+          rpy="0 0 0" />
+        <mass value="0.22298680527299394316" />
+        <inertia ixx="8.8701734811461518601e-05" ixy="8.0794207721028392386e-10"
+          ixz="-3.5252658158901637823e-12" iyy="8.9079070488606209091e-05"
+          iyz="-1.6464233015813588186e-09" izz="0.00016621369094718240617" />
+      </inertial>
+    </link>
+
+    <joint name="${prefix}delta_d" type="revolute">
+      <origin xyz="0 -0.014186745762824942707 -0.050000000000000058287"
+        rpy="1.570796326794896558 -6.1232339957367660359e-17 0" />
+      <parent link="wheel_anchor_4" />
+      <child link="wheel_4" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+    <joint name="${prefix}gamma_d" type="revolute">
+      <origin xyz="-0.17999999999999996558 0.18000000000000007661 0.089999999999999968914"
+        rpy="0 -0 0" />
+      <parent link="chasis" />
+      <child link="wheel_anchor_4" />
+      <axis xyz="0 0 1" />
+      <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
+      <joint_properties friction="0.0" />
+    </joint>
+
+
+    <!-- base_joint fixes base_link to the environment -->
+    <joint name="${prefix}${prefix}base_joint" type="fixed">
+      <xacro:insert_block name="origin" />
+      <parent link="${parent}" />
+      <child link="base_link" />
+    </joint>
+
+
+  </xacro:macro>
+</robot>
