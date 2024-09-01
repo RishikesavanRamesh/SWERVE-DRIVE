@@ -87,8 +87,8 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "robot_controller",
-            default_value="joint_trajectory_controller",
-            choices=["forward_position_controller", "joint_trajectory_controller"],
+            default_value="swervebot_base_controller",
+            choices=["swervebot_base_controller"],
             description="Robot controller to start.",
         )
     )
@@ -170,7 +170,7 @@ def generate_launch_description():
             )
         ]
 
-    inactive_robot_controller_names = ["diff_drive_controller"]
+    inactive_robot_controller_names = []
     inactive_robot_controller_spawners = []
     for controller in inactive_robot_controller_names:
         inactive_robot_controller_spawners += [
