@@ -13,11 +13,11 @@ swervebot_base_controller:
   ros__parameters:
     # left_wheel_names: ["gamma_a", "gamma_b"]
     # right_wheel_names: ["gamma_c", "gamma_d"]
-    left_wheel_names: ["delta_a", "delta_b"]
-    right_wheel_names: ["delta_c", "delta_d"]
+    left_wheel_names: ["delta_a", "delta_b", "gamma_a", "gamma_b"]
+    right_wheel_names: ["delta_c", "delta_d", "gamma_c", "gamma_d"]
 
     wheel_separation: 0.36
-    wheels_per_side: 2
+    wheels_per_side: 4
     wheel_radius: 0.08
 
     wheel_separation_multiplier: 1.0

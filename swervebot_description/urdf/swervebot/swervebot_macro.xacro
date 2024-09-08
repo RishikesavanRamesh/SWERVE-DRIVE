@@ -6,15 +6,9 @@
 
   <xacro:macro name="swervebot" params="prefix parent *origin">
 
-    <link name="${prefix}base_link"></link>
-  <joint name="${parent}_to_${prefix}_base_link" type="fixed">
-    <parent link="${parent}"/>
-    <child link="${prefix}base_link"/>
-    <xacro:insert_block name="origin"/>
-  </joint>
     
     <joint name="${prefix}base_link_to_base" type="fixed">
-      <parent link="base_link" />
+      <parent link="${prefix}base_link" />
       <child link="chasis" />
       <origin rpy="0.0 0 0" xyz="0 0 0" />
     </joint>
@@ -104,9 +98,9 @@
         rpy="1.570796326794896558 -6.1232339957367660359e-17 0" />
       <parent link="wheel_anchor" />
       <child link="wheel" />
-      <axis xyz="0 0 1" />
+       <axis xyz="0 0 1" />
       <limit effort="1" velocity="20" lower="0" upper="6.283185307179586232" />
-      <joint_properties friction="0.0" />
+     <joint_properties friction="0.0" />
     </joint>
 
     <joint name="${prefix}gamma_a" type="revolute">
@@ -352,9 +346,10 @@
     <joint name="${prefix}${prefix}base_joint" type="fixed">
       <xacro:insert_block name="origin" />
       <parent link="${parent}" />
-      <child link="base_link" />
+      <child link="${prefix}base_link" />
     </joint>
 
 
+    <link name="${prefix}base_link"></link>
   </xacro:macro>
 </robot>

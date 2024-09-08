@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <xacro:macro name="swervebot_ros2_control" params="
+  <xacro:macro name="swervebot_ros2_control"
+    params="
                name
                prefix
                use_mock_hardware:=false
@@ -9,12 +10,13 @@
                sim_gazebo_classic:=false
                sim_gazebo:=false
                simulation_controllers"
-               >
+  >
 
     <ros2_control name="${name}" type="system">
       <hardware>
         <xacro:if value="${use_mock_hardware}">
           <plugin>mock_components/GenericSystem</plugin>
+          <param name="calculate_dynamics">true</param>
           <param name="mock_sensor_commands">${mock_sensor_commands}</param>
         </xacro:if>
         <xacro:if value="${sim_gazebo_classic}">
@@ -27,66 +29,55 @@
           <plugin>robot_hardware_inteface/RobotHardwareInteface</plugin>
         </xacro:unless>
       </hardware>
-<!-- 
+
+
       <joint name="${prefix}delta_a">
         <command_interface name="velocity" />
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
+        <state_interface name="position" />
         <state_interface name="velocity" />
       </joint>
       <joint name="${prefix}delta_b">
-              <command_interface name="velocity" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+
       </joint>
       <joint name="${prefix}delta_c">
-              <command_interface name="velocity" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+
       </joint>
       <joint name="${prefix}delta_d">
-              <command_interface name="velocity" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+
       </joint>
 
       <joint name="${prefix}gamma_a">
-        <command_interface name="position" />
-        <state_interface name="position">
-          <param name="initial_value">0.0</param>
-        </state_interface>
+        <command_interface name="velocity" />
+        <state_interface name="position" />
         <state_interface name="velocity" />
       </joint>
       <joint name="${prefix}gamma_b">
-              <command_interface name="position" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+
       </joint>
       <joint name="${prefix}gamma_c">
-              <command_interface name="position" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+
       </joint>
       <joint name="${prefix}gamma_d">
-              <command_interface name="position" />
-              <state_interface name="position">
-                <param name="initial_value">0.0</param>
-              </state_interface>
-              <state_interface name="velocity" />
-      </joint> -->
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
 
-
+      </joint>
 
     </ros2_control>
 

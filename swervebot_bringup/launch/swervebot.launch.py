@@ -137,7 +137,11 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         output="both",
-        parameters=[robot_description, robot_controllers],
+        parameters=[robot_controllers],
+        remappings=[
+            ("~/robot_description", "/robot_description"),
+            ("/swervebot_base_controller/cmd_vel", "/cmd_vel")
+        ],
     )
     robot_state_pub_node = Node(
         package="robot_state_publisher",
@@ -149,14 +153,14 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        output="log",
+        # output="log",
         arguments=["-d", rviz_config_file],
     )
 
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager", "--ros-args", "--log-level", "debug"],
     )
 
     robot_controller_names = [robot_controller]
