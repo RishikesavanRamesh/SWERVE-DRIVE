@@ -21,49 +21,46 @@
 #ifndef SWERVEBOT_CONTROLLER__SWERVEBOT_CONTROLLER_HPP_
 #define SWERVEBOT_CONTROLLER__SWERVEBOT_CONTROLLER_HPP_
 
+#include <chrono>
+#include <cmath>
+#include <queue>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "controller_interface/controller_interface.hpp"
 #include "swervebot_controller/visibility_control.h"
-#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp" // ?
 #include "rclcpp_lifecycle/state.hpp"
 #include "realtime_tools/realtime_buffer.h"
 #include "realtime_tools/realtime_publisher.h"
 #include "std_srvs/srv/set_bool.hpp"
 
+
+
+#include "swervebot_controller/odometry.hpp"
+#include "swervebot_controller/speed_limiter.hpp"
+
+#include "geometry_msgs/msg/twist.hpp"
+#include "geometry_msgs/msg/twist_stamped.hpp"
+#include "hardware_interface/handle.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "odometry.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "realtime_tools/realtime_box.h"
+#include "tf2_msgs/msg/tf_message.hpp"
+
+
 //will be generated using generate_parameter_library 
 #include "swervebot_controller_parameters.hpp"
 
 
-#include "geometry_msgs/msg/twist.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-
 namespace swervebot_controller
 {
-// name constants for state interfaces
-static constexpr size_t STATE_MY_ITFS = 0;
 
-// name constants for command interfaces
-static constexpr size_t CMD_MY_ITFS = 0;
-
-// TODO(anyone: example setup for control mode (usually you will use some enums defined in messages)
-// TODO(rishikesavanramesh): setup control mode for fast and slow , and for holonomic and non-holonomic
-enum class control_mode_type : std::uint8_t
-{
-  FAST = 0,
-  SLOW = 1,
-};
 
 class SwervebotController : public controller_interface::ControllerInterface
 {
-
-
-    // TODO(anyone): replace the state and command message types
-  using ControllerReferenceMsg = control_msgs::msg::JointJog;
-  using ControllerModeSrvType = std_srvs::srv::SetBool;
-  using ControllerStateMsg = control_msgs::msg::JointControllerState;
 
   using Twist = geometry_msgs::msg::TwistStamped;
 
@@ -110,29 +107,68 @@ public:
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 
 
-
 protected:
-  std::shared_ptr<swervebot_controller::ParamListener> param_listener_;
-  swervebot_controller::Params params_;
+  struct WheelHandle
+  {
+    std::reference_wrapper<const hardware_interface::LoanedStateInterface> feedback;
+    std::reference_wrapper<hardware_interface::LoanedCommandInterface> velocity;
+  };
 
-  std::vector<std::string> state_joints_;
+  const char * feedback_type() const;
+  controller_interface::CallbackReturn configure_modules(
+    const std::string & side, const std::vector<std::string> & wheel_names,
+    std::vector<WheelHandle> & registered_handles);
 
-  // Command subscribers and Controller State publisher
-  rclcpp::Subscription<ControllerReferenceMsg>::SharedPtr ref_subscriber_ = nullptr;
-  realtime_tools::RealtimeBuffer<std::shared_ptr<ControllerReferenceMsg>> input_ref_;
+  std::vector<WheelHandle> registered_wheel_handles_;
 
-  rclcpp::Service<ControllerModeSrvType>::SharedPtr set_slow_control_mode_service_;
-  realtime_tools::RealtimeBuffer<control_mode_type> control_mode_;
+  // Parameters from ROS for diff_drive_controller
+  std::shared_ptr<ParamListener> param_listener_;
+  Params params_;
 
-  using ControllerStatePublisher = realtime_tools::RealtimePublisher<ControllerStateMsg>;
+  Odometry odometry_;
 
-  rclcpp::Publisher<ControllerStateMsg>::SharedPtr s_publisher_;
-  std::unique_ptr<ControllerStatePublisher> state_publisher_;
+  // Timeout to consider cmd_vel commands old
+  std::chrono::milliseconds cmd_vel_timeout_{500};
 
-private:
-  // callback for topic interface
-  SWERVEBOT_CONTROLLER__VISIBILITY_LOCAL
-  void reference_callback(const std::shared_ptr<ControllerReferenceMsg> msg);
+  std::shared_ptr<rclcpp::Publisher<nav_msgs::msg::Odometry>> odometry_publisher_ = nullptr;
+  std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>>
+    realtime_odometry_publisher_ = nullptr;
+
+  std::shared_ptr<rclcpp::Publisher<tf2_msgs::msg::TFMessage>> odometry_transform_publisher_ =
+    nullptr;
+  std::shared_ptr<realtime_tools::RealtimePublisher<tf2_msgs::msg::TFMessage>>
+    realtime_odometry_transform_publisher_ = nullptr;
+
+  bool subscriber_is_active_ = false;
+  rclcpp::Subscription<Twist>::SharedPtr velocity_command_subscriber_ = nullptr;
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr
+    velocity_command_unstamped_subscriber_ = nullptr;
+
+  realtime_tools::RealtimeBox<std::shared_ptr<Twist>> received_velocity_msg_ptr_{nullptr};
+
+  std::queue<Twist> previous_commands_;  // last two commands
+
+  // speed limiters
+  SpeedLimiter limiter_linear_;
+  SpeedLimiter limiter_angular_;
+
+  bool publish_limited_velocity_ = false;
+  std::shared_ptr<rclcpp::Publisher<Twist>> limited_velocity_publisher_ = nullptr;
+  std::shared_ptr<realtime_tools::RealtimePublisher<Twist>> realtime_limited_velocity_publisher_ =
+    nullptr;
+
+  rclcpp::Time previous_update_timestamp_{0};
+
+  // publish rate limiter
+  double publish_rate_ = 50.0;
+  rclcpp::Duration publish_period_ = rclcpp::Duration::from_nanoseconds(0);
+  rclcpp::Time previous_publish_timestamp_{0, 0, RCL_CLOCK_UNINITIALIZED};
+
+  bool is_halted = false;
+  bool use_stamped_vel_ = true;
+
+  bool reset();
+  void halt();
 };
 
 }  // namespace swervebot_controller

@@ -1,42 +1,24 @@
-// Copyright 2020 PAL Robotics S.L.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-/*
- * Author: Luca Marchionni
- * Author: Bence Magyar
- * Author: Enrique Fernández
- * Author: Paul Mathieu
- */
-
-#ifndef DIFF_DRIVE_CONTROLLER__ODOMETRY_HPP_
-#define DIFF_DRIVE_CONTROLLER__ODOMETRY_HPP_
+#ifndef SWERVE_DRIVE_CONTROLLER__ODOMETRY_HPP_
+#define SWERVE_DRIVE_CONTROLLER__ODOMETRY_HPP_
 
 #include <cmath>
-
+#include <vector> // For using std::vector
 #include "rclcpp/time.hpp"
 #include "rcppmath/rolling_mean_accumulator.hpp"
 
-namespace diff_drive_controller
+namespace swerve_drive_controller
 {
 class Odometry
 {
 public:
-  explicit Odometry(size_t velocity_rolling_window_size = 10);
+  explicit Odometry(size_t velocity_rolling_window_size = 10, size_t number_of_modules = 4);
 
   void init(const rclcpp::Time & time);
-  bool update(double left_pos, double right_pos, const rclcpp::Time & time);
-  bool updateFromVelocity(double left_vel, double right_vel, const rclcpp::Time & time);
+
+  bool update(const std::vector<std::pair<double, double>>& module_states, const rclcpp::Time & time);
+
+  bool updateFromVelocity(const std::vector<std::pair<double, double>>& module_velocities, const rclcpp::Time & time);
+
   void updateOpenLoop(double linear, double angular, const rclcpp::Time & time);
   void resetOdometry();
 
@@ -46,7 +28,8 @@ public:
   double getLinear() const { return linear_; }
   double getAngular() const { return angular_; }
 
-  void setWheelParams(double wheel_separation, double left_wheel_radius, double right_wheel_radius);
+  void setWheelParams(const std::vector<std::tuple<double, double, double>>& wheel_params);
+
   void setVelocityRollingWindowSize(size_t velocity_rolling_window_size);
 
 private:
@@ -56,26 +39,22 @@ private:
   void integrateExact(double linear, double angular);
   void resetAccumulators();
 
-  // Current timestamp:
   rclcpp::Time timestamp_;
 
   // Current pose:
-  double x_;        //   [m]
-  double y_;        //   [m]
+  double x_;        // [m]
+  double y_;        // [m]
   double heading_;  // [rad]
 
   // Current velocity:
-  double linear_;   //   [m/s]
+  double linear_;   // [m/s]
   double angular_;  // [rad/s]
 
   // Wheel kinematic parameters [m]:
-  double wheel_separation_;
-  double left_wheel_radius_;
-  double right_wheel_radius_;
-
-  // Previous wheel position/state [rad]:
-  double left_wheel_old_pos_;
-  double right_wheel_old_pos_;
+  std::vector<std::tuple<double, double, double>> wheel_params_; // wheel_pos_x, wheel_pos_y, wheel_radius
+  
+  // Previous module states [position, direction]:
+  std::vector<std::pair<double, double>> old_module_states_;
 
   // Rolling mean accumulators for the linear and angular velocities:
   size_t velocity_rolling_window_size_;
@@ -83,6 +62,6 @@ private:
   RollingMeanAccumulator angular_accumulator_;
 };
 
-}  // namespace diff_drive_controller
+}  // namespace swerve_drive_controller
 
-#endif  // DIFF_DRIVE_CONTROLLER__ODOMETRY_HPP_
+#endif  // SWERVE_DRIVE_CONTROLLER__ODOMETRY_HPP_

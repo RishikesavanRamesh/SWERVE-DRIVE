@@ -87,8 +87,8 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "robot_controller",
-            default_value="swervebot_base_controller",
-            choices=["swervebot_base_controller"],
+            default_value="swervebot_diff_drive_controller",
+            choices=["swervebot_diff_drive_controller"],
             description="Robot controller to start.",
         )
     )
@@ -140,7 +140,6 @@ def generate_launch_description():
         parameters=[robot_controllers],
         remappings=[
             ("~/robot_description", "/robot_description"),
-            ("/swervebot_base_controller/cmd_vel", "/cmd_vel")
         ],
     )
     robot_state_pub_node = Node(

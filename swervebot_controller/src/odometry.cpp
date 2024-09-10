@@ -16,25 +16,24 @@
  * Author: Enrique Fernández
  */
 
-#include "diff_drive_controller/odometry.hpp"
 
-namespace diff_drive_controller
+// TODO(RISHIKESAVAN) make it follow everywhere swerve_drive_controller or swervebot_controller?
+#include "swerve_drive_controller/odometry.hpp"
+
+namespace swerve_drive_controller
 {
-Odometry::Odometry(size_t velocity_rolling_window_size)
+Odometry::Odometry(size_t velocity_rolling_window_size, size_t number_of_modules)
 : timestamp_(0.0),
   x_(0.0),
   y_(0.0),
   heading_(0.0),
   linear_(0.0),
   angular_(0.0),
-  wheel_separation_(0.0),
-  left_wheel_radius_(0.0),
-  right_wheel_radius_(0.0),
-  left_wheel_old_pos_(0.0),
-  right_wheel_old_pos_(0.0),
+  wheel_params_(), // Initialize to an empty vector
+  old_module_states_(), // Initialize to an empty vector
   velocity_rolling_window_size_(velocity_rolling_window_size),
   linear_accumulator_(velocity_rolling_window_size),
-  angular_accumulator_(velocity_rolling_window_size)
+  angular_accumulator_(velocity_rolling_window_size) 
 {
 }
 
@@ -45,40 +44,64 @@ void Odometry::init(const rclcpp::Time & time)
   timestamp_ = time;
 }
 
-bool Odometry::update(double left_pos, double right_pos, const rclcpp::Time & time)
+bool Odometry::update(const std::vector<std::pair<double, double>>& module_states, const rclcpp::Time & time)
 {
-  // We cannot estimate the speed with very small time intervals:
-  const double dt = time.seconds() - timestamp_.seconds();
-  if (dt < 0.0001)
-  {
-    return false;  // Interval too small to integrate with
-  }
+    // We cannot estimate the speed with very small time intervals:
+    const double dt = time.seconds() - timestamp_.seconds();
+    if (dt < 0.0001)
+    {
+        return false;  // Interval too small to integrate with
+    }
 
-  // Get current wheel joint positions:
-  const double left_wheel_cur_pos = left_pos * left_wheel_radius_;
-  const double right_wheel_cur_pos = right_pos * right_wheel_radius_;
+    // Vector to store estimated velocities and directions of all modules
+    std::vector<std::pair<double, double>> modules_est_vel;
 
-  // Estimate velocity of wheels using old and current position:
-  const double left_wheel_est_vel = left_wheel_cur_pos - left_wheel_old_pos_;
-  const double right_wheel_est_vel = right_wheel_cur_pos - right_wheel_old_pos_;
+    // Iterate over each module (wheel)
+    for (size_t i = 0; i < wheel_params_.size(); ++i)
+    {
+        if (i >= module_states.size()) 
+        {
+            // Handle case where module_states doesn't have corresponding entry
+            break;
+        }
 
-  // Update old position with current:
-  left_wheel_old_pos_ = left_wheel_cur_pos;
-  right_wheel_old_pos_ = right_wheel_cur_pos;
+        // Extract wheel parameters for the current module
+        double wheel_pos_x, wheel_pos_y, wheel_radius;
+        std::tie(wheel_pos_x, wheel_pos_y, wheel_radius) = wheel_params_[i];
 
-  updateFromVelocity(left_wheel_est_vel, right_wheel_est_vel, time);
+        // Extract the current state for the module
+        double current_pos, current_dir;
+        std::tie(current_pos, current_dir) = module_states[i];
 
-  return true;
+        // Compute current position of the wheel/module
+        double cur_pos = current_pos * wheel_radius;
+
+        // Compute estimated velocity for the current module
+        double old_pos = old_module_states_[i].first * wheel_radius;
+        double est_vel = cur_pos - old_pos;
+
+        // Update the estimated velocities vector
+        modules_est_vel.emplace_back(est_vel, current_dir);
+
+        // Update old position for the current module
+        old_module_states_[i] = { cur_pos, current_dir };
+    }
+
+    // Pass the estimated velocities and directions for further processing
+    updateFromVelocity(modules_est_vel,time);
+
+    return true;
 }
 
-bool Odometry::updateFromVelocity(double left_vel, double right_vel, const rclcpp::Time & time)
+bool Odometry::updateFromVelocity(const std::vector<std::pair<double, double>>& module_velocities, const rclcpp::Time & time)
 {
   const double dt = time.seconds() - timestamp_.seconds();
 
-  // Compute linear and angular diff:
-  const double linear = (left_vel + right_vel) * 0.5;
-  // Now there is a bug about scout angular velocity
-  const double angular = (right_vel - left_vel) / wheel_separation_;
+  // TODO(RISHIKESAVAN): UPDATE FROM THE SWERVEDRIVE KINEMATICS
+  // // Compute linear and angular swerve:
+  // const double linear = (left_vel + right_vel) * 0.5;
+  // // Now there is a bug about scout angular velocity
+  // const double angular = (right_vel - left_vel) / wheel_separation_;
 
   // Integrate odometry:
   integrateExact(linear, angular);
@@ -114,12 +137,13 @@ void Odometry::resetOdometry()
   heading_ = 0.0;
 }
 
-void Odometry::setWheelParams(
-  double wheel_separation, double left_wheel_radius, double right_wheel_radius)
+void Odometry::setWheelParams(const std::vector<std::tuple<double, double, double>>& wheel_params)
 {
-  wheel_separation_ = wheel_separation;
-  left_wheel_radius_ = left_wheel_radius;
-  right_wheel_radius_ = right_wheel_radius;
+    // Clear existing wheel parameters
+    wheel_params_.clear();
+
+    // Set the new wheel parameters
+    wheel_params_ = wheel_params;
 }
 
 void Odometry::setVelocityRollingWindowSize(size_t velocity_rolling_window_size)
@@ -162,4 +186,4 @@ void Odometry::resetAccumulators()
   angular_accumulator_ = RollingMeanAccumulator(velocity_rolling_window_size_);
 }
 
-}  // namespace diff_drive_controller
+}  // namespace swerve_drive_controller
