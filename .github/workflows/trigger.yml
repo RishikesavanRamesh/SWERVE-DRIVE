@@ -1,0 +1,17 @@
+
+name: Call site builder
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger
+        run: |
+          curl -X POST https://api.github.com/repos/:userName/R2PPA/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.ACTIONS_KEY }} \
+          --data '{"event_type": "build_passed", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
+      - uses: actions/checkout@v4
