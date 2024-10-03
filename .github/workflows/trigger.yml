@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Trigger
         run: |
-          curl -X POST https://api.github.com/repos/:userName/R2PPA/dispatches \
+          curl -X POST https://api.github.com/repos/RishikesavanRamesh/R2PPA/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.ACTIONS_KEY }} \
           --data '{"event_type": "build_passed", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
